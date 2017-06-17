@@ -1,6 +1,6 @@
 from os import chdir, listdir, getcwd, rename, walk
 from os.path import isdir, split, isfile, splitext, join
-from math import log
+from math import log, ceil
 import argparse
 
 
@@ -11,7 +11,7 @@ def rename_folder(working_path, base_name='', skip_list=()):
         base_name = base_name or split(getcwd())[-1].replace(' ', '_')
         files = [file for file in listdir(working_path) if isfile(file) and splitext(file)[-1] not in skip_list
                  and not file.startswith('.')]
-        digits = int(log(len(files)))
+        digits = int(ceil(log(len(files),10))) if len(files) > 0 else 0
         for i in range(len(files)):
             file_name, file_ext = splitext(files[i])
             if file_ext not in skip_list:
@@ -23,10 +23,10 @@ def rename_folder(working_path, base_name='', skip_list=()):
         print('Path does not exist')
 
 
-def rename_folders(working_path, identify, skip_list, folder_skip_list=()):
+def rename_folders(working_path, identify, skip_list, folder_skip_list):
     name_changes = {}
     for root, dirs, files in walk(working_path):
-        for d in [x for x in dirs if x not in folder_skip_list]:
+        for d in [x for x in dirs if x not in folder_skip_list and not x.startswith('.')]:
             full_path = join(root, d)
             if identify:
                 new_name = input('"{}" should be labeled as: '.format(full_path)).replace(' ', '_')
@@ -38,6 +38,7 @@ def rename_folders(working_path, identify, skip_list, folder_skip_list=()):
                 name_changes[full_path] = d.lower()
     for full_path in name_changes.keys():
         rename_folder(full_path, base_name=name_changes[full_path], skip_list=skip_list)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Rename files in folders for consistent naming schemes.')

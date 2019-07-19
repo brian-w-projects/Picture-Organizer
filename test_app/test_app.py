@@ -31,7 +31,6 @@ class PictureOrganizerTester(unittest.TestCase):
                     else:
                         open(lorem_ipsum.words(randint(1, 4)) + choice(self.extensions), 'a').close()
                 os.chdir(self.cwd)
-
         os.chdir(self.cwd)
 
     def test_invalid_pathway(self):
@@ -76,6 +75,17 @@ class PictureOrganizerTester(unittest.TestCase):
         po = PictureOrganizer(self.pathways['outer'], simulate=True)
         po.rename_folders()
         self.assertListEqual(original_outer, os.listdir(self.pathways['outer']))
+
+    def test_time_ordering(self):
+        original_outer = [os.path.getmtime(f) for f in os.listdir(self.pathways['outer'])
+                          if os.path.isfile(f) and not f.startswith('.')]
+
+        po = PictureOrganizer(self.pathways['outer'], recurse=False)
+        po.rename_folders()
+
+        renamed_outer = [os.path.getmtime(f) for f in os.listdir(self.pathways['outer'])
+                         if os.path.isfile(f) and not f.startswith('.')]
+        self.assertListEqual(original_outer, renamed_outer)
 
     def verify_name_change(self, ext_skip=()):
         for folder_name, pathway in self.pathways.items():

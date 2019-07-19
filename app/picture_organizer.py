@@ -1,5 +1,5 @@
 from os import chdir, listdir, rename, walk, getcwd
-from os.path import isfile, splitext, join, basename, isdir
+from os.path import isfile, splitext, join, basename, isdir, getmtime
 from math import log, ceil
 import argparse
 
@@ -28,8 +28,10 @@ class PictureOrganizer:
         current_directory = getcwd()
         chdir(path)
 
-        files = [f for f in listdir(path) if isfile(f) and splitext(f)[-1][1:] not in self.options.get('ext_skip', [])
-                 and not f.startswith('.')]
+        files = sorted([f for f in listdir(path)
+                        if isfile(f) and splitext(f)[-1][1:] not in self.options.get('ext_skip', [])
+                        and not f.startswith('.')],
+                       key=lambda x: getmtime(x))
         file_name_base = basename(path).lower().replace(' ', '_')
         digits = ceil(log(len(files), 10)) if len(files) > 0 else 0
 
